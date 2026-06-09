@@ -20,9 +20,143 @@
       color: #fff;
       min-height: 100dvh;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient background ── */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .ambient-grid {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 80% 65% at 50% 45%, #000 15%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 45%, #000 15%, transparent 80%);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.3;
+    }
+
+    .orb-1 {
+      width: 260px;
+      height: 260px;
+      top: -8%;
+      left: -15%;
+      background: #3ecf8e;
+      animation: float-1 18s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 220px;
+      height: 220px;
+      top: 35%;
+      right: -18%;
+      background: #6366f1;
+      animation: float-2 22s ease-in-out infinite;
+    }
+
+    .orb-3 {
+      width: 200px;
+      height: 200px;
+      bottom: -5%;
+      left: 15%;
+      background: #ec4899;
+      animation: float-3 20s ease-in-out infinite;
+    }
+
+    @keyframes float-1 {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(25px, 20px); }
+    }
+
+    @keyframes float-2 {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(-20px, 15px); }
+    }
+
+    @keyframes float-3 {
+      0%, 100% { transform: translate(0, 0); }
+      50%       { transform: translate(18px, -18px); }
+    }
+
+    .hero {
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 2.5rem;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+
+    .countdown-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 0.75rem 0.5rem;
+      backdrop-filter: blur(8px);
+    }
+
+    @media (min-width: 601px) {
+      .ambient-grid {
+        background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      .orb {
+        filter: blur(90px);
+        opacity: 0.45;
+      }
+
+      .orb-1 { width: 480px; height: 480px; top: -12%; left: -8%; }
+      .orb-2 { width: 420px; height: 420px; top: 30%; right: -10%; }
+      .orb-3 { width: 380px; height: 380px; bottom: -8%; left: 25%; }
+
+      @keyframes float-1 {
+        0%, 100% { transform: translate(0, 0); }
+        50%       { transform: translate(40px, 30px); }
+      }
+
+      @keyframes float-2 {
+        0%, 100% { transform: translate(0, 0); }
+        50%       { transform: translate(-35px, 25px); }
+      }
+
+      @keyframes float-3 {
+        0%, 100% { transform: translate(0, 0); }
+        50%       { transform: translate(30px, -30px); }
+      }
+
+      .hero::before {
+        top: -2rem;
+        height: 3.5rem;
+        background: linear-gradient(180deg, transparent, rgba(255,255,255,0.15), transparent);
+      }
+
+      .countdown-item {
+        border-radius: 12px;
+      }
     }
 
     .page {
+      position: relative;
+      z-index: 1;
       min-height: 100dvh;
       display: grid;
       grid-template-rows: auto 1fr auto;
@@ -389,10 +523,18 @@
 
     @media (prefers-reduced-motion: reduce) {
       .title { animation: none; }
+      .orb { animation: none !important; }
     }
   </style>
 </head>
 <body>
+
+  <div class="ambient" aria-hidden="true">
+    <div class="ambient-grid"></div>
+    <div class="orb orb-1" id="orb-1"></div>
+    <div class="orb orb-2" id="orb-2"></div>
+    <div class="orb orb-3" id="orb-3"></div>
+  </div>
 
   <div class="page">
 
@@ -510,6 +652,26 @@
         e.preventDefault();
         location.reload();
       });
+
+      if (window.matchMedia('(min-width: 601px)').matches) {
+        var orbs = [
+          { el: document.getElementById('orb-1'), factor: 0.02 },
+          { el: document.getElementById('orb-2'), factor: -0.015 },
+          { el: document.getElementById('orb-3'), factor: 0.012 }
+        ];
+        document.addEventListener('mousemove', function (e) {
+          var cx = window.innerWidth / 2;
+          var cy = window.innerHeight / 2;
+          var dx = e.clientX - cx;
+          var dy = e.clientY - cy;
+          orbs.forEach(function (o) {
+            if (o.el) {
+              o.el.style.marginLeft = (dx * o.factor) + 'px';
+              o.el.style.marginTop = (dy * o.factor) + 'px';
+            }
+          });
+        });
+      }
 
       var DAYS = 45;
       var MS_DAY = 86400000;
